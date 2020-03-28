@@ -12,7 +12,7 @@ use \LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 use \LINE\LINEBot\MessageBuilder\StickerMessageBuilder;
 use \LINE\LINEBot\SignatureValidator as SignatureValidator;
  
-$pass_signature = true;
+//$pass_signature = true;
  
 // set LINE channel_access_token and channel_secret
 $channel_access_token = "BmRuAuS0LXGKWLH5yTOgPPK0xBH72J9eAt3PB/0Iu5ZD+BMTx/3B9gV8rceCY5XSIibdOaVHM/LmFJupUgXm11GtzlrzNainf7c1w3Pz6fInfxOTX5DFMRJWPEgmJgg7O8E2tJ71yajjYe0Xuy40PwdB04t89/1O/w1cDnyilFU=";
@@ -52,6 +52,31 @@ $app->post('/webhook', function (Request $request, Response $response) use ($cha
     }
     
 // kode aplikasi nanti disini
+	$data = json_decode($body, true);
+if(is_array($data['events'])){
+    foreach ($data['events'] as $event)
+    {
+        if ($event['type'] == 'message')
+        {
+            if($event['message']['type'] == 'text')
+            {
+                // send same message as reply to user
+                $result = $bot->replyText($event['replyToken'], $event['message']['text']);
+ 
+ 
+                // or we can use replyMessage() instead to send reply message
+                // $textMessageBuilder = new TextMessageBuilder($event['message']['text']);
+                // $result = $bot->replyMessage($event['replyToken'], $textMessageBuilder);
+ 
+ 
+                $response->getBody()->write(json_encode($result->getJSONDecodedBody()));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus($result->getHTTPStatus());
+            }
+        }
+    }
+}
  
 });
 $app->run();
